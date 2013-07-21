@@ -1,8 +1,7 @@
 package br.com.caelum.paypal.doom;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,6 +30,7 @@ public class RecurrenceTest {
 		Assert.assertTrue(g.isCanceled());
 		Assert.assertEquals(0, g.getNumberOfPayments());
 		
+		Assert.assertEquals(new BigDecimal("0.00"), g.getTotalPaid());
 		
 		Assert.assertEquals(ipn1, g.getIpns().get(0));
 		Assert.assertEquals(ipn3, g.getIpns().get(2));
@@ -67,10 +67,16 @@ public class RecurrenceTest {
 				ipn2, ipn3, ipn4, ipn5, ipn6));
 		
 		Assert.assertEquals(TransactionType.RECURRENCE_PAYMENT, g.getIpns().get(0).getTransactionType());
-		Assert.assertEquals(TransactionType.REFUNDED, g.getIpns().get(1).getTransactionType());
+		Assert.assertEquals(TransactionType.REFUND, g.getIpns().get(1).getTransactionType());
 		Assert.assertEquals(TransactionType.RECURRENCE_PAYMENT, g.getIpns().get(2).getTransactionType());
 		Assert.assertEquals(TransactionType.RECURRENCE_SKIPPED, g.getIpns().get(3).getTransactionType());
 		Assert.assertEquals(TransactionType.RECURRENCE_SKIPPED, g.getIpns().get(4).getTransactionType());
 		Assert.assertEquals(TransactionType.RECURRENCE_FAILED, g.getIpns().get(5).getTransactionType());
+		
+		Assert.assertFalse(g.isCanceled());
+		Assert.assertEquals(2, g.getNumberOfPayments());
+		Assert.assertEquals(1, g.getNumberOfRefunds());
+		Assert.assertEquals(new BigDecimal("99.99"), g.getTotalPaid());
+
 	}
 }

@@ -81,7 +81,7 @@ public class IPN implements Comparable<IPN> {
 
 	public TransactionType getTransactionType() {
 		if(hasKey("payment_status") && extract("payment_status").equals("Refunded")) {
-			return TransactionType.REFUNDED;
+			return TransactionType.REFUND;
 		}
 		return TransactionType.toType(decode("txn_type"));
 	}

@@ -6,7 +6,7 @@ public enum TransactionType {
 	RECURRENCE_CANCELED("recurring_payment_profile_cancel"),
 	RECURRENCE_FAILED("recurring_payment_failed"),
 	RECURRENCE_CREATED("recurring_payment_profile_created"),
-	RECURRENCE_PAYMENT("recurring_payment"), REFUNDED("xxxxxx");
+	RECURRENCE_PAYMENT("recurring_payment"), REFUND("xxxxxx");
 
 	private String paypalCode;
 	
