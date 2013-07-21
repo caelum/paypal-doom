@@ -46,8 +46,11 @@ public class Recurrence implements Comparable<Recurrence> {
 	}
 	
 	public boolean isCanceled() {
+		for(IPN i : ipns) {
+			if(i.getTransactionType().equals(TransactionType.RECURRENCE_CANCELED))
+				return true;
+		}
 		return false;
-		//return ipns.last().getTransactionType().equals(TransactionType.RECURRENCE_CANCELED);
 	}
 
 	@Override

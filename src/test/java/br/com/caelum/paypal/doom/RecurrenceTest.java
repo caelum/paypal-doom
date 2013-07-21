@@ -27,6 +27,11 @@ public class RecurrenceTest {
 				ipn2, ipn3, ipn4));
 
 		Assert.assertEquals(3, g.getIpns().size());
+		
+		Assert.assertTrue(g.isCanceled());
+		Assert.assertEquals(0, g.getNumberOfPayments());
+		
+		
 		Assert.assertEquals(ipn1, g.getIpns().get(0));
 		Assert.assertEquals(ipn3, g.getIpns().get(2));
 		Assert.assertEquals(TransactionType.RECURRENCE_CREATED, g.getIpns().get(0).getTransactionType());
