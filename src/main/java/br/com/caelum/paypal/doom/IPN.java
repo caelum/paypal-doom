@@ -31,11 +31,15 @@ public class IPN implements Comparable<IPN> {
 	public String getToken() {
 		return extract("TOKEN");
 	}
+	
+	public boolean isRecurring() {
+		return hasKey("recurring_payment_id");
+	}
 
 	String extract(String key) {
 		int start = body.indexOf(key + "=");
 		if (start == -1)
-			throw new NoSuchElementException(key);
+			throw new NoSuchElementException(key + " in " + body);
 
 		start += 1 + key.length();
 		int end = body.indexOf(";&", start);
@@ -107,6 +111,7 @@ public class IPN implements Comparable<IPN> {
 	
 	@Override
 	public String toString() {
+		if(!isRecurring()) return String.format("[IPN notrecurring %s]", body);
 		return String.format("[IPN %s %s %s]", getVerifySign(), formatter.print(this.getTimeCreated()), this.getPayerEmail());
 	}
 	

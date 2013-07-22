@@ -2,16 +2,20 @@ package br.com.caelum.paypal.doom;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class IPNAnalyzer {
 
-	private Map<String, List<IPN>> ipns;
+	private Map<String, List<IPN>> ipns = new HashMap<>();
 
 	public void addIPN(IPN ipn) {
-		if (!ipns.containsKey(ipn.getPayerEmail())) {
+		if(!ipn.isRecurringPayment()) {
+			throw new IllegalArgumentException("not a recurring IPN");
+		}
+		if (!ipns.containsKey(ipn.getRecurringPaymentId())) {
 			ipns.put(ipn.getRecurringPaymentId(), new ArrayList<IPN>());
 		}
 		List<IPN> group = ipns.get(ipn.getRecurringPaymentId());

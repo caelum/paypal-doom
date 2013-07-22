@@ -6,8 +6,16 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 public class Recurrence implements Comparable<Recurrence> {
 
+
+	static final DateTimeFormatter formatter = 
+			DateTimeFormat.forPattern("dd/MM/yyyy");
+	
 	private String recurrenceId;
 	private List<IPN> ipns;
 
@@ -26,13 +34,17 @@ public class Recurrence implements Comparable<Recurrence> {
 			if (ipn.getTransactionType().equals(TransactionType.REFUND))
 				numberOfRefunds++;
 			if (ipn.getTransactionType().equals(
-					TransactionType.RECURRENCE_PAYMENT))
+					TransactionType.RECURRENCE_PAYMENT)
+					|| ipn.getTransactionType().equals(
+							TransactionType.RECURRENCE_OUTSTANDING_PAYMENT))
 				numberOfPayments++;
 			if (ipn.getTransactionType().equals(
 					TransactionType.RECURRENCE_SKIPPED))
 				numberOfSkips++;
 			if (ipn.getTransactionType().equals(
-					TransactionType.RECURRENCE_FAILED))
+					TransactionType.RECURRENCE_FAILED)
+					|| ipn.getTransactionType().equals(
+							TransactionType.RECURRENCE_OUTSTANDING_FAILED))
 				numberOfFailures++;
 		}
 		// linked hash set to remove repeated elements
@@ -101,15 +113,23 @@ public class Recurrence implements Comparable<Recurrence> {
 	}
 
 	@Override
-	public String toString() {
+	public String toString() {		
 		List<TransactionType> transactions = new ArrayList<>();
+
 		for (IPN i : getIpns()) {
 			transactions.add(i.getTransactionType());
 		}
 		return String.format(
-				"[REC %s %s\t paid:%d skip:%d refunds:%d value:\t%s %s]",
-				getPayerEmail(), isCanceled() ? "CANCELED" : "VALID",
-				getNumberOfPayments(), getNumberOfSkips(),
-				getNumberOfRefunds(), getTotalPaid(), transactions);
+				"[REC %s %8s paid:%2d skip:%2d refunds:%2d R$%7s %25s %s]",
+				formatter.print(getTimeCreated()),
+				isCanceled() ? "CANCELED" : "VALID", getNumberOfPayments(),
+				getNumberOfSkips(), getNumberOfRefunds(), getTotalPaid(),
+				getPayerEmail().substring(0,
+						Math.min(24, getPayerEmail().length())),
+				transactions);
+	}
+
+	public DateTime getTimeCreated() {
+		return ipns.get(0).getTimeCreated();
 	}
 }
