@@ -112,6 +112,9 @@ public class Recurrence implements Comparable<Recurrence> {
 		return getNumberOfPayments() > 0;
 	}
 
+	public boolean hasSkips() {
+		return getNumberOfSkips() > 0;
+	}
 	@Override
 	public String toString() {		
 		List<TransactionType> transactions = new ArrayList<>();
