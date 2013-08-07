@@ -42,6 +42,42 @@ public class RecurrenceTest {
 	
 
 
+
+	@Test
+	public void test_create_and_skip() {
+		// ERA MELHOR COM MOCK
+		IPN ipn1 = new IPN(
+				"residence_country=BR;&product_name=1 mes de cursos da Alura, R$197.00;&time_created=04:51:08 Jul 05, 2013 PDT;&next_payment_date=03:00:00 Aug 05, 2013 PDT;&outstanding_balance=197.00;&verify_sign=Ay8bfb6mVh3W9pUfPeDjXiGc9uGhAwuRgp0dEEJXQxMQ96JGChg-ThHT;&amount=197.00;&first_name=paulooo;&payer_id=9WBQL476Q2YNN;&shipping=0.00;&payer_email=paulo@paulo.com.br;&period_type= Regular;&receiver_email=billing@caelum.com.br;&notify_version=3.7;&txn_type=recurring_payment_profile_created;&currency_code=BRL;&payer_status=verified;&rp_invoice_id=ecc30fb5-fa5d-4872-b05f-03f182875899;&initial_payment_status=Failed;&initial_payment_amount=197.00;&charset=UTF-8;&product_type=1;&amount_per_cycle=197.00;&ipn_track_id=30f5b5a4d06d;&recurring_payment_id=XPTO;&tax=0.00;&payment_cycle=Monthly;&last_name=silveira;&profile_status=Active;&");
+	
+		Recurrence g = new Recurrence("XPTO", Arrays.asList(ipn1));
+		Assert.assertFalse(g.isCanceled());
+		Assert.assertFalse(g.hasPayments());
+		Assert.assertEquals(0, g.getNumberOfPayments());
+
+		Assert.assertTrue(g.hasSkips());
+		Assert.assertEquals(1, g.getNumberOfSkips());
+
+		Assert.assertEquals(new BigDecimal("0.00"), g.getTotalPaid());
+	}
+	
+	@Test
+	public void test_create_with_init_pay() {
+		// ERA MELHOR COM MOCK
+		IPN ipn1 = new IPN(
+				"residence_country=BR;&product_name=1 mes de cursos da Alura, R$197.00;&time_created=04:54:35 Jul 05, 2013 PDT;&next_payment_date=03:00:00 Aug 05, 2013 PDT;&outstanding_balance=0.00;&verify_sign=AiY17Nwogeh9-6FflLZWEJgQDzSwAYhToznEAiLbwwo3g1NaqqWYZJRf;&amount=197.00;&first_name=Paulo;&payer_id=T762N3ESUS5XU;&shipping=0.00;&payer_email=paulo@paulo.com.br;&period_type= Regular;&receiver_email=billing@caelum.com.br;&notify_version=3.7;&txn_type=recurring_payment_profile_created;&currency_code=BRL;&payer_status=verified;&rp_invoice_id=1af27359-abe1-4aae-9c5c-638644fa401d;&initial_payment_txn_id=1JA96445U1675612S;&initial_payment_status=Completed;&initial_payment_amount=197.00;&charset=UTF-8;&product_type=1;&amount_per_cycle=197.00;&ipn_track_id=2d3fbc4cddf3b;&recurring_payment_id=XPTO;&tax=0.00;&payment_cycle=Monthly;&last_name=Fim;&profile_status=Active;&");
+	
+		Recurrence g = new Recurrence("XPTO", Arrays.asList(ipn1));
+		Assert.assertFalse(g.isCanceled());
+		Assert.assertTrue(g.hasPayments());
+		Assert.assertEquals(1, g.getNumberOfPayments());
+
+		Assert.assertFalse(g.hasSkips());
+		Assert.assertEquals(0, g.getNumberOfSkips());
+
+		Assert.assertEquals(new BigDecimal("197.00"), g.getTotalPaid());
+	}
+	
+	
 	public void test_another_series_of_ipns() {
 		IPN ipn4 = new IPN(
 				"residence_country=BR;&product_name=1 mes de cursos da Caelum no Caelum Online, R$99.99;&time_created=09:59:55 May 07, 2013 PDT;&next_payment_date=03:00:00 May 07, 2013 PDT;&verify_sign=AE51dwHG0dC1.9oQNCAAVtfBML1eAyA8rLAnzelJtePsvi6HWy3uUUnr;&outstanding_balance=0.00;&amount=99.99;&first_name=EDUARDO;&payer_id=REFM3XJMNJUHN;&shipping=0.00;&payer_email=xpto@gmail.com;&period_type= Regular;&receiver_email=billing@caelum.com.br;&notify_version=3.7;&txn_type=recurring_payment_profile_created;&currency_code=BRL;&payer_status=unverified;&rp_invoice_id=2fdbecc0-e971-4511-95c4-029bc07ab57c;&initial_payment_amount=0.00;&charset=UTF-8;&product_type=1;&amount_per_cycle=99.99;&ipn_track_id=df0bd280baf3c;&recurring_payment_id=I-3FDBDM0F6WHY;&tax=0.00;&payment_cycle=Monthly;&last_name=xpto;&profile_status=Active;&");

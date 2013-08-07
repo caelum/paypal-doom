@@ -62,30 +62,29 @@ public class IPNReader {
 		for (Recurrence r : recurrences) {
 
 			System.out.println(r);
-			if (r.getTimeCreated().isAfter(new DateTime(2013, 5, 7, 0, 0, 0))) {
-				if (r.getTimeCreated().isBefore(
-						new DateTime(2013, 6, 7, 0, 0, 0))) {
-					antigas++;
-					if (r.hasPayments()) {
-						antigasComPagamentos++;
-						if (r.hasSkips())
-							antigasRecuperadas++;
-					} else
-						antigasSemPagamentos++;
-					if (r.isCanceled())
-						antigasCanceladas++;
-				} else {
-					novas++;
-					if (r.hasPayments()) {
-						novasComPagamentos++;
-						if (r.hasSkips())
-							novasRecuperadas++;
-					} else
-						novasSemPagamentos++;
-					if (r.isCanceled())
-						novasCanceladas++;
-				}
-
+			if (r.getTimeCreated().isBefore(new DateTime(2013, 5, 7, 0, 0, 0))) {
+				//continue;
+			}
+			if (r.getTimeCreated().isBefore(new DateTime(2013, 7, 5, 0, 0, 0))) {
+				antigas++;
+				if (r.hasPayments()) {
+					antigasComPagamentos++;
+					if (r.hasSkips())
+						antigasRecuperadas++;
+				} else
+					antigasSemPagamentos++;
+				if (r.isCanceled())
+					antigasCanceladas++;
+			} else {
+				novas++;
+				if (r.hasPayments()) {
+					novasComPagamentos++;
+					if (r.hasSkips())
+						novasRecuperadas++;
+				} else
+					novasSemPagamentos++;
+				if (r.isCanceled())
+					novasCanceladas++;
 			}
 
 		}

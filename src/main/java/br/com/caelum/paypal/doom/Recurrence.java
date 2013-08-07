@@ -12,10 +12,9 @@ import org.joda.time.format.DateTimeFormatter;
 
 public class Recurrence implements Comparable<Recurrence> {
 
+	static final DateTimeFormatter formatter = DateTimeFormat
+			.forPattern("dd/MM/yyyy");
 
-	static final DateTimeFormatter formatter = 
-			DateTimeFormat.forPattern("dd/MM/yyyy");
-	
 	private String recurrenceId;
 	private List<IPN> ipns;
 
@@ -36,10 +35,13 @@ public class Recurrence implements Comparable<Recurrence> {
 			if (ipn.getTransactionType().equals(
 					TransactionType.RECURRENCE_PAYMENT)
 					|| ipn.getTransactionType().equals(
-							TransactionType.RECURRENCE_OUTSTANDING_PAYMENT))
+							TransactionType.RECURRENCE_OUTSTANDING_PAYMENT) ||
+							ipn.getTransactionType().equals(
+									TransactionType.RECURRENCE_CREATED_WITH_PAYMENT) )
 				numberOfPayments++;
 			if (ipn.getTransactionType().equals(
-					TransactionType.RECURRENCE_SKIPPED))
+					TransactionType.RECURRENCE_SKIPPED) || ipn.getTransactionType().equals(
+							TransactionType.RECURRENCE_CREATED_BUT_SKIPPED) )
 				numberOfSkips++;
 			if (ipn.getTransactionType().equals(
 					TransactionType.RECURRENCE_FAILED)
@@ -85,7 +87,9 @@ public class Recurrence implements Comparable<Recurrence> {
 
 		for (IPN i : ipns) {
 			if (i.getTransactionType().equals(
-					TransactionType.RECURRENCE_PAYMENT))
+					TransactionType.RECURRENCE_PAYMENT)
+					|| i.getTransactionType().equals(
+							TransactionType.RECURRENCE_CREATED_WITH_PAYMENT))
 				total = total.add(i.getAmount());
 			if (i.getTransactionType().equals(TransactionType.REFUND))
 				total = total.subtract(i.getAmount());
@@ -115,8 +119,9 @@ public class Recurrence implements Comparable<Recurrence> {
 	public boolean hasSkips() {
 		return getNumberOfSkips() > 0;
 	}
+
 	@Override
-	public String toString() {		
+	public String toString() {
 		List<TransactionType> transactions = new ArrayList<>();
 
 		for (IPN i : getIpns()) {
@@ -124,11 +129,10 @@ public class Recurrence implements Comparable<Recurrence> {
 		}
 		return String.format(
 				"[REC %s %8s paid:%2d skip:%2d refunds:%2d R$%7s %25s %s]",
-				formatter.print(getTimeCreated()),
-				isCanceled() ? "CANCELED" : "VALID", getNumberOfPayments(),
-				getNumberOfSkips(), getNumberOfRefunds(), getTotalPaid(),
-				getPayerEmail().substring(0,
-						Math.min(24, getPayerEmail().length())),
+				formatter.print(getTimeCreated()), isCanceled() ? "CANCELED"
+						: "VALID", getNumberOfPayments(), getNumberOfSkips(),
+				getNumberOfRefunds(), getTotalPaid(), getPayerEmail()
+						.substring(0, Math.min(24, getPayerEmail().length())),
 				transactions);
 	}
 
