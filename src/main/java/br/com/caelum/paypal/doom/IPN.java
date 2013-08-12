@@ -124,6 +124,10 @@ public class IPN implements Comparable<IPN> {
 	public String getVerifySign() {
 		return extract("verify_sign");
 	}
+	
+	public String getProductName() {
+		return extract("product_name");
+	}
 
 	@Override
 	public String toString() {

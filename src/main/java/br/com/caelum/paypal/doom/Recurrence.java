@@ -16,6 +16,7 @@ public class Recurrence implements Comparable<Recurrence> {
 			.forPattern("dd/MM/yyyy");
 
 	private String recurrenceId;
+	private String productName;
 	private List<IPN> ipns;
 
 	private int numberOfPayments;
@@ -25,7 +26,8 @@ public class Recurrence implements Comparable<Recurrence> {
 
 	public Recurrence(String recurrenceId, List<IPN> ipns) {
 		this.recurrenceId = recurrenceId;
-
+		this.productName = ipns.iterator().next().getProductName();
+		
 		for (IPN ipn : ipns) {
 			if (!ipn.getRecurringPaymentId().equals(recurrenceId)) {
 				throw new IllegalArgumentException(ipn.toString());
@@ -128,15 +130,19 @@ public class Recurrence implements Comparable<Recurrence> {
 			transactions.add(i.getTransactionType());
 		}
 		return String.format(
-				"[REC %s %8s paid:%2d skip:%2d refunds:%2d R$%7s %25s %s]",
+				"[REC %s %8s paid:%2d skip:%2d refunds:%2d R$%7s %25s %s %s]",
 				formatter.print(getTimeCreated()), isCanceled() ? "CANCELED"
 						: "VALID", getNumberOfPayments(), getNumberOfSkips(),
 				getNumberOfRefunds(), getTotalPaid(), getPayerEmail()
 						.substring(0, Math.min(24, getPayerEmail().length())),
-				transactions);
+				transactions, getProductName());
 	}
 
 	public DateTime getTimeCreated() {
 		return ipns.get(0).getTimeCreated();
+	}
+	
+	public String getProductName() {
+		return productName;
 	}
 }
