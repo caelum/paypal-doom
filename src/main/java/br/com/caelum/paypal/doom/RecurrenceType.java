@@ -23,9 +23,10 @@ public enum RecurrenceType {
 		return months;
 	}
 
-	public RecurrenceType toType(String paypalDescription) {
+	public static RecurrenceType toType(String paypalDescription) {
 		if (paypalDescription.contains("R$99.99")
-				|| paypalDescription.contains("R$ 99.99"))
+				|| paypalDescription.contains("R$ 99.99")
+				|| paypalDescription.contains("R$ 99.00"))
 			return MONTHLY_99;
 		if (paypalDescription.contains("R$699.99"))
 			return SEMIANNUAL_699;

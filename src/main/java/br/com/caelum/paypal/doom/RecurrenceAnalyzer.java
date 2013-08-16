@@ -10,8 +10,10 @@ public class RecurrenceAnalyzer {
 	private BigDecimal amount = new BigDecimal("0.00");
 	private BigDecimal expected = new BigDecimal("0.00");
 	private BigDecimal expectedExceptCanceledWithoutPayments = new BigDecimal("0.00");
+	private int total = 0;
 	
 	public void add(Recurrence r) {
+		total++;
 		amount = amount.add(r.getTotalPaid());
 		expected = expected.add(r.getExpectedPayment());
 		
@@ -21,7 +23,6 @@ public class RecurrenceAnalyzer {
 		} else {
 			expectedExceptCanceledWithoutPayments = expectedExceptCanceledWithoutPayments.add(r.getExpectedPayment());
 			activeRecurrences.add(r.getNumberOfPayments());
-			
 		}		
 	}
 	
@@ -40,7 +41,22 @@ public class RecurrenceAnalyzer {
 	
 	@Override
 	public String toString() {
-		return String.format("\n all recurrences: %s\nactive %s\ncanceled %s", all);
+		StringBuilder builder = new StringBuilder("[");
+		int total = this.total - all.get(0);
+		//int parcial = total;
+		
+		for (int i = 1; i <= canceledRecurrences.getMaxKey(); i++) {
+			int canceled = canceledRecurrences.get(i);
+			
+			
+			//parcial -= canceled;
+			builder.append(String.format("%d:%d (%.1f%%), ", canceled, total,
+					((double) canceled) * 100 / total));
+			
+			total -= all.get(i);
+		}
+		builder.append("]").toString();
+		return String.format("\nall: \t\t%s\nactive: \t%s\ncanceled: \t%s\nfunil: \t%s\n", all, activeRecurrences, canceledRecurrences, builder);
 	}
 	
 }

@@ -23,6 +23,10 @@ public class Histogram {
 	public int getTotal() {
 		return total;
 	}
+	
+	public int getMaxKey() {
+		return maxKey;
+	}
 
 	public int get(int key) {
 		if (!values.containsKey(key)) {

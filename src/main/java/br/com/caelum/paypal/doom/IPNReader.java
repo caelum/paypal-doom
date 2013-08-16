@@ -57,22 +57,22 @@ public class IPNReader {
 		logger.info(recurrences.size());
 
 		List<? extends RecurrenceFilter> filters = Arrays.asList(
-				new RecurrenceFilter() {
-					public boolean filter(Recurrence r) {
-						return r.getProductName().contains("R$99.99")
-								|| r.getProductName().contains("R$ 99.99");
-					}
-				}, new PriceFilter("R$699.99"), new PriceFilter("R$149.99"),
-				new PriceFilter("R$197.00"));
+				new PriceFilter(RecurrenceType.MONTHLY_99),
+				new PriceFilter(RecurrenceType.MONTHLY_149), new PriceFilter(
+						RecurrenceType.SEMIANNUAL_699), new PriceFilter(
+						RecurrenceType.MONTHLY_197));
 
 		for (RecurrenceFilter f : filters) {
 			int novasComPagamentos = 0, novasRecuperadas = 0, novasSemPagamentos = 0, novasCanceladas = 0, novas = 0;
-
+			RecurrenceAnalyzer rAnalyzer = new RecurrenceAnalyzer();
+			
 			System.out.println("novo filtro");
 			System.out.println();
 			for (Recurrence r : recurrences) {
 				if (!f.filter(r))
 					continue;
+				
+				rAnalyzer.add(r);
 				System.out.println(r);
 
 				novas++;
@@ -90,6 +90,7 @@ public class IPNReader {
 					"novas %d(%d canceladas) pagas: %d(%d) nao pagas: %d",
 					novas, novasCanceladas, novasComPagamentos,
 					novasRecuperadas, novasSemPagamentos));
+			logger.info(rAnalyzer);
 		}
 
 	}
