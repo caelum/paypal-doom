@@ -1,4 +1,4 @@
-package br.com.caelum.paypal.doom;
+package br.com.caelum.analise.paypal;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -9,7 +9,9 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-public class IPN implements Comparable<IPN> {
+import br.com.caelum.analise.TransactionType;
+
+public class IPN  {
 
 	static final DateTimeFormatter parser = DateTimeFormat
 			.forPattern("HH:mm:ss MMM dd, yyyy zzz");
@@ -35,7 +37,7 @@ public class IPN implements Comparable<IPN> {
 		return hasKey("recurring_payment_id");
 	}
 
-	String extract(String key) {
+	public String extract(String key) {
 		int start = body.indexOf(key + "=");
 		if (start == -1)
 			throw new NoSuchElementException(key + " in " + body);
@@ -114,11 +116,6 @@ public class IPN implements Comparable<IPN> {
 	public DateTime getTimeCreated() {
 		// TODO cache
 		return parser.parseDateTime(extract("time_created"));
-	}
-
-	@Override
-	public int compareTo(IPN o) {
-		return this.getTimeCreated().compareTo(o.getTimeCreated());
 	}
 
 	public String getVerifySign() {

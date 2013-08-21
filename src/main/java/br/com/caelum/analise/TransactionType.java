@@ -1,4 +1,4 @@
-package br.com.caelum.paypal.doom;
+package br.com.caelum.analise;
 
 public enum TransactionType {
 

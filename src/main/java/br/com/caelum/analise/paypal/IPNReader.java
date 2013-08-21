@@ -1,4 +1,4 @@
-package br.com.caelum.paypal.doom;
+package br.com.caelum.analise.paypal;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,6 +8,12 @@ import java.util.Scanner;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+
+import br.com.caelum.analise.PriceFilter;
+import br.com.caelum.analise.Recurrence;
+import br.com.caelum.analise.RecurrenceAnalyzer;
+import br.com.caelum.analise.RecurrenceFilter;
+import br.com.caelum.analise.RecurrenceType;
 
 public class IPNReader {
 	static Logger logger = Logger.getLogger(IPNReader.class);
@@ -50,7 +56,6 @@ public class IPNReader {
 			analyzer.addIPN(ipn);
 		}
 
-		logger.info("carregado");
 
 		List<Recurrence> recurrences = analyzer.getRecurrences();
 		logger.info("IPNs " + total);
@@ -76,7 +81,7 @@ public class IPNReader {
 				System.out.println(r);
 
 				novas++;
-				if (r.hasPayments()) {
+				if (r.hasRealPayments()) {
 					novasComPagamentos++;
 					if (r.hasSkips())
 						novasRecuperadas++;

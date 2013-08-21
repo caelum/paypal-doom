@@ -1,4 +1,5 @@
-package br.com.caelum.paypal.doom;
+package br.com.caelum.analise;
+
 
 public interface RecurrenceFilter {
 	boolean filter(Recurrence r);

@@ -14,6 +14,9 @@ import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Test;
 
+import br.com.caelum.analise.TransactionType;
+import br.com.caelum.analise.paypal.IPN;
+
 public class IPNTest {
 	@Test
 	public void should_extract_bigtest() {

@@ -1,4 +1,4 @@
-package br.com.caelum.paypal.doom;
+package br.com.caelum.analise;
 
 import java.util.HashMap;
 import java.util.Map;

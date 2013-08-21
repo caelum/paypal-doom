@@ -1,6 +1,7 @@
-package br.com.caelum.paypal.doom;
+package br.com.caelum.analise;
 
 import java.math.BigDecimal;
+
 
 public class RecurrenceAnalyzer {
 
@@ -17,12 +18,12 @@ public class RecurrenceAnalyzer {
 		amount = amount.add(r.getTotalPaid());
 		expected = expected.add(r.getExpectedPayment());
 		
-		all.add(r.getNumberOfPayments());
+		all.add(r.getNumberOfRealPayments());
 		if(r.isCanceled()) {
-			canceledRecurrences.add(r.getNumberOfPayments());
+			canceledRecurrences.add(r.getNumberOfRealPayments());
 		} else {
 			expectedExceptCanceledWithoutPayments = expectedExceptCanceledWithoutPayments.add(r.getExpectedPayment());
-			activeRecurrences.add(r.getNumberOfPayments());
+			activeRecurrences.add(r.getNumberOfRealPayments());
 		}		
 	}
 	

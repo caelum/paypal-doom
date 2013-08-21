@@ -3,6 +3,8 @@ package br.com.caelum.paypal.doom;
 import org.junit.Assert;
 import org.junit.Test;
 
+import br.com.caelum.analise.Histogram;
+
 public class HistogramTest {
 
 	@Test

@@ -1,9 +1,9 @@
-package br.com.caelum.paypal.doom;
+package br.com.caelum.analise;
 
 import java.math.BigDecimal;
 
 public enum RecurrenceType {
-	MONTHLY_99(new BigDecimal("99.99"), 1), MONTHLY_149(
+	MONTHLY_99_MOIP(new BigDecimal("99.00"), 1), MONTHLY_99(new BigDecimal("99.99"), 1), MONTHLY_149(
 			new BigDecimal("149.99"), 1), MONTHLY_197(new BigDecimal("197.00"),
 			1), SEMIANNUAL_699(new BigDecimal("699.99"), 1);
 

@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import br.com.caelum.analise.paypal.IPN;
+
 public class RecurrenceAnalyzerTest {
 
 	@Test

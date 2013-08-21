@@ -1,4 +1,4 @@
-package br.com.caelum.paypal.doom;
+package br.com.caelum.analise.paypal;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import br.com.caelum.analise.Recurrence;
 
 public class IPNAnalyzer {
 
@@ -23,8 +25,8 @@ public class IPNAnalyzer {
 		group.add(ipn);
 	}
 
-	Recurrence getRecurrenceFor(String recurringId) {
-		return new Recurrence(recurringId, ipns.get(recurringId));
+	PaypalRecurrence getRecurrenceFor(String recurringId) {
+		return new PaypalRecurrence(recurringId, ipns.get(recurringId));
 	}
 
 	Set<String> getRecurringPaymentIds() {
