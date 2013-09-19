@@ -15,6 +15,10 @@ public class IPN  {
 
 	static final DateTimeFormatter parser = DateTimeFormat
 			.forPattern("HH:mm:ss MMM dd, yyyy zzz");
+	
+
+	static final DateTimeFormatter moipParser = DateTimeFormat
+			.forPattern("yyyy-MM-dd");
 
 	static final DateTimeFormatter formatter = DateTimeFormat
 			.forPattern("HH:mm:ss dd/MM/yyyy");
@@ -115,7 +119,14 @@ public class IPN  {
 
 	public DateTime getTimeCreated() {
 		// TODO cache
-		return parser.parseDateTime(extract("time_created"));
+		DateTime dt;
+		try {
+			dt = parser.parseDateTime(extract("time_created"));
+		} catch(IllegalArgumentException e) {
+			dt = moipParser.parseDateTime(extract("time_created").substring(0,10));
+		}
+		
+		return dt;
 	}
 
 	public String getVerifySign() {
@@ -137,11 +148,11 @@ public class IPN  {
 	@Override
 	public boolean equals(Object obj) {
 		IPN i = (IPN) obj;
-		return getVerifySign().equals(i.getVerifySign());
+		return body.equals(i.body);
 	}
 
 	@Override
 	public int hashCode() {
-		return this.getVerifySign().hashCode();
+		return this.body.hashCode();
 	}
 }

@@ -28,5 +28,12 @@ public enum TransactionType {
 		}
 		throw new IllegalArgumentException(code);
 	}
+
+	public static TransactionType MOIPtoType(String value) {
+		if(value.equals("CREATED")) return RECURRENCE_CREATED;
+		if(value.equals("PAID")) return RECURRENCE_PAYMENT;
+		if(value.equals("SUSPENDED") || value.equals("CANCELED")) return RECURRENCE_CANCELED;
+		throw new IllegalArgumentException(value);
+	}
 	
 }

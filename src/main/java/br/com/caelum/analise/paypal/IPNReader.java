@@ -9,7 +9,7 @@ import java.util.Scanner;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
-import br.com.caelum.analise.PriceFilter;
+import br.com.caelum.analise.RecurrenceTypeFilter;
 import br.com.caelum.analise.Recurrence;
 import br.com.caelum.analise.RecurrenceAnalyzer;
 import br.com.caelum.analise.RecurrenceFilter;
@@ -22,7 +22,7 @@ public class IPNReader {
 
 		IPNAnalyzer analyzer = new IPNAnalyzer();
 		Scanner s = new Scanner(new File(
-				"/Users/peas/Desktop/Dropbox/tmp/ipns.txt"));
+				"/Users/peas/Desktop/Dropbox/tmp/ipns/moip-gui.txt"));
 
 		int total = 0;
 		while (s.hasNextLine()) {
@@ -62,39 +62,26 @@ public class IPNReader {
 		logger.info(recurrences.size());
 
 		List<? extends RecurrenceFilter> filters = Arrays.asList(
-				new PriceFilter(RecurrenceType.MONTHLY_99),
-				new PriceFilter(RecurrenceType.MONTHLY_149), new PriceFilter(
-						RecurrenceType.SEMIANNUAL_699), new PriceFilter(
+				new RecurrenceTypeFilter(RecurrenceType.MOIP_99),
+				new RecurrenceTypeFilter(RecurrenceType.MONTHLY_99),
+				new RecurrenceTypeFilter(RecurrenceType.MONTHLY_149), new RecurrenceTypeFilter(
+						RecurrenceType.SEMIANNUAL_699), new RecurrenceTypeFilter(
 						RecurrenceType.MONTHLY_197));
 
 		for (RecurrenceFilter f : filters) {
-			int novasComPagamentos = 0, novasRecuperadas = 0, novasSemPagamentos = 0, novasCanceladas = 0, novas = 0;
 			RecurrenceAnalyzer rAnalyzer = new RecurrenceAnalyzer();
 			
-			System.out.println("novo filtro");
-			System.out.println();
+			
 			for (Recurrence r : recurrences) {
 				if (!f.filter(r))
 					continue;
 				
 				rAnalyzer.add(r);
 				System.out.println(r);
-
-				novas++;
-				if (r.hasRealPayments()) {
-					novasComPagamentos++;
-					if (r.hasSkips())
-						novasRecuperadas++;
-				} else
-					novasSemPagamentos++;
-				if (r.isCanceled())
-					novasCanceladas++;
-
 			}
-			logger.info(String.format(
-					"novas %d(%d canceladas) pagas: %d(%d) nao pagas: %d",
-					novas, novasCanceladas, novasComPagamentos,
-					novasRecuperadas, novasSemPagamentos));
+			
+			System.out.println("Resumo do filtro " + f);
+			System.out.println();
 			logger.info(rAnalyzer);
 		}
 

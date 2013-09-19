@@ -5,7 +5,8 @@ import java.math.BigDecimal;
 public enum RecurrenceType {
 	MONTHLY_99_MOIP(new BigDecimal("99.00"), 1), MONTHLY_99(new BigDecimal("99.99"), 1), MONTHLY_149(
 			new BigDecimal("149.99"), 1), MONTHLY_197(new BigDecimal("197.00"),
-			1), SEMIANNUAL_699(new BigDecimal("699.99"), 1);
+			1), SEMIANNUAL_699(new BigDecimal("699.99"), 1), MOIP_99(new BigDecimal("99.99"),1),
+			MOIP_699(new BigDecimal("699.99"),6);
 
 	private BigDecimal value;
 	private int months;
@@ -34,6 +35,11 @@ public enum RecurrenceType {
 			return MONTHLY_149;
 		if (paypalDescription.contains("R$197.00"))
 			return MONTHLY_197;
+		
+		if (paypalDescription.contains("MOIP_99"))
+			return MOIP_99;
+		if (paypalDescription.contains("MOIP_699"))
+			return MOIP_699;
 
 		throw new IllegalArgumentException(paypalDescription);
 	}
