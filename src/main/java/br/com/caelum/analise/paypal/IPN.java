@@ -11,17 +11,13 @@ import org.joda.time.format.DateTimeFormatter;
 
 import br.com.caelum.analise.TransactionType;
 
-public class IPN  {
+public class IPN {
 
-	static final DateTimeFormatter parser = DateTimeFormat
-			.forPattern("HH:mm:ss MMM dd, yyyy zzz");
-	
+	static final DateTimeFormatter parser = DateTimeFormat.forPattern("HH:mm:ss MMM dd, yyyy zzz");
 
-	static final DateTimeFormatter moipParser = DateTimeFormat
-			.forPattern("yyyy-MM-dd");
+	static final DateTimeFormatter moipParser = DateTimeFormat.forPattern("yyyy-MM-dd");
 
-	static final DateTimeFormatter formatter = DateTimeFormat
-			.forPattern("HH:mm:ss dd/MM/yyyy");
+	static final DateTimeFormatter formatter = DateTimeFormat.forPattern("HH:mm:ss dd/MM/yyyy");
 
 	private final String body;
 
@@ -90,15 +86,19 @@ public class IPN  {
 	}
 
 	public TransactionType getTransactionType() {
-		if (hasKey("payment_status")
-				&& extract("payment_status").equals("Refunded")) {
+		if (hasKey("payment_status") && 
+				(extract("payment_status").equals("Refunded") 
+						|| extract("payment_status").equals("Reversed"))) {
 			return TransactionType.REFUND;
 		}
-		if (TransactionType.toType(decode("txn_type")).equals(
-				TransactionType.RECURRENCE_CREATED)
+		if (TransactionType.toType(decode("txn_type")).equals(TransactionType.RECURRENCE_CREATED)
+				&& hasKey("paidCycles")) {
+			return TransactionType.RECURRENCE_CREATED_WITH_CYCLES;
+		}
+		if (TransactionType.toType(decode("txn_type")).equals(TransactionType.RECURRENCE_CREATED)
 				&& hasKey("initial_payment_status")) {
 			if (extract("initial_payment_status").equals("Completed")) {
-				return TransactionType.RECURRENCE_CREATED_WITH_PAYMENT;
+				return TransactionType.RECURRENCE_CREATED_WITH_FIRST_PAYMENT;
 			}
 			if (extract("initial_payment_status").equals("Failed")) {
 				return TransactionType.RECURRENCE_CREATED_BUT_SKIPPED;
@@ -109,30 +109,27 @@ public class IPN  {
 	}
 
 	public BigDecimal getAmount() {
-		if (getTransactionType().equals(
-				TransactionType.RECURRENCE_CREATED_WITH_PAYMENT)
-				|| getTransactionType().equals(
-						TransactionType.RECURRENCE_CREATED_BUT_SKIPPED))
+		if (getTransactionType().equals(TransactionType.RECURRENCE_CREATED_WITH_FIRST_PAYMENT)
+				|| getTransactionType().equals(TransactionType.RECURRENCE_CREATED_BUT_SKIPPED))
 			return new BigDecimal(extract("initial_payment_amount"));
 		return new BigDecimal(extract("amount"));
 	}
 
 	public DateTime getTimeCreated() {
-		// TODO cache
 		DateTime dt;
 		try {
 			dt = parser.parseDateTime(extract("time_created"));
-		} catch(IllegalArgumentException e) {
-			dt = moipParser.parseDateTime(extract("time_created").substring(0,10));
+		} catch (IllegalArgumentException e) {
+			dt = moipParser.parseDateTime(extract("time_created").substring(0, 10));
 		}
-		
+
 		return dt;
 	}
 
 	public String getVerifySign() {
 		return extract("verify_sign");
 	}
-	
+
 	public String getProductName() {
 		return extract("product_name");
 	}
@@ -141,8 +138,8 @@ public class IPN  {
 	public String toString() {
 		if (!isRecurring())
 			return String.format("[IPN notrecurring %s]", body);
-		return String.format("[IPN %s %s %s]", getVerifySign(),
-				formatter.print(this.getTimeCreated()), this.getPayerEmail());
+		return String.format("[IPN %s %s %s]", getVerifySign(), formatter.print(this.getTimeCreated()),
+				this.getPayerEmail());
 	}
 
 	@Override
@@ -154,5 +151,27 @@ public class IPN  {
 	@Override
 	public int hashCode() {
 		return this.body.hashCode();
+	}
+
+	public int getPaidCycles() {
+		if (getTransactionType().equals(TransactionType.RECURRENCE_CREATED_WITH_FIRST_PAYMENT)
+				|| getTransactionType().equals(TransactionType.RECURRENCE_PAYMENT)
+				|| getTransactionType().equals(TransactionType.RECURRENCE_OUTSTANDING_PAYMENT))
+			return 1;
+		// formato do GUI
+		if (getTransactionType().equals(TransactionType.RECURRENCE_CREATED_WITH_CYCLES))
+			return Integer.parseInt(extract("paidCycles"));
+		throw new IllegalStateException();
+	}
+
+	public int getRefunds() {
+		if (getTransactionType().equals(TransactionType.REFUND))
+			return 1;
+		// formato do GUI
+		if (getTransactionType().equals(TransactionType.RECURRENCE_CREATED_WITH_CYCLES)) {
+			String value = extract("reimbursements").replace(";", "");
+			return Integer.parseInt(value);
+		}
+		throw new IllegalStateException();
 	}
 }

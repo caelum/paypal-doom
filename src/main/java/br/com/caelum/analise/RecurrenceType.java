@@ -26,14 +26,16 @@ public enum RecurrenceType {
 
 	public static RecurrenceType toType(String paypalDescription) {
 		if (paypalDescription.contains("R$99.99")
+				|| paypalDescription.contains("PAYPAL_99")
 				|| paypalDescription.contains("R$ 99.99")
-				|| paypalDescription.contains("R$ 99.00"))
+				|| paypalDescription.contains("R$ 99.00")
+				|| paypalDescription.contains("R$99,00"))
 			return MONTHLY_99;
-		if (paypalDescription.contains("R$699.99"))
+		if (paypalDescription.contains("R$699.99")  || paypalDescription.contains("PAYPAL_699"))
 			return SEMIANNUAL_699;
-		if (paypalDescription.contains("R$149.99"))
+		if (paypalDescription.contains("149")  || paypalDescription.contains("PAYPAL_149"))
 			return MONTHLY_149;
-		if (paypalDescription.contains("R$197.00"))
+		if (paypalDescription.contains("197") || paypalDescription.contains("PAYPAL_199"))
 			return MONTHLY_197;
 		
 		if (paypalDescription.contains("MOIP_99"))

@@ -34,4 +34,6 @@ public interface Recurrence  extends Comparable<Recurrence> {
 
 	public abstract RecurrenceType getType();
 
+	public abstract DateTime getTimeCanceled();
+
 }

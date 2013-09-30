@@ -16,8 +16,7 @@ import br.com.caelum.analise.TransactionType;
 
 public class PaypalRecurrence implements Recurrence {
 
-	static final DateTimeFormatter formatter = DateTimeFormat
-			.forPattern("dd/MM/yyyy");
+	static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy");
 
 	private String recurrenceId;
 	private String productName;
@@ -29,40 +28,51 @@ public class PaypalRecurrence implements Recurrence {
 	private int numberOfFailures;
 	private RecurrenceType type;
 
+	private boolean canceled;
+
+	private IPN cancelIPN;
+
 	public PaypalRecurrence(String recurrenceId, List<IPN> ipns) {
 		this.recurrenceId = recurrenceId;
 		this.productName = ipns.iterator().next().getProductName();
 		this.type = RecurrenceType.toType(ipns.iterator().next().getProductName());
-		
+
 		for (IPN ipn : ipns) {
 			if (!ipn.getRecurringPaymentId().equals(recurrenceId)) {
 				throw new IllegalArgumentException(ipn.toString());
 			}
-			if (ipn.getTransactionType().equals(TransactionType.REFUND))
-				numberOfRefunds++;
-			if (ipn.getTransactionType().equals(
-					TransactionType.RECURRENCE_PAYMENT)
-					|| ipn.getTransactionType().equals(
-							TransactionType.RECURRENCE_OUTSTANDING_PAYMENT) ||
-							ipn.getTransactionType().equals(
-									TransactionType.RECURRENCE_CREATED_WITH_PAYMENT) )
-				numberOfPayments++;
-			if (ipn.getTransactionType().equals(
-					TransactionType.RECURRENCE_SKIPPED) || ipn.getTransactionType().equals(
-							TransactionType.RECURRENCE_CREATED_BUT_SKIPPED) )
+
+			TransactionType transaction = ipn.getTransactionType();
+
+			if (transaction.equals(TransactionType.REFUND)
+					|| transaction.equals(TransactionType.RECURRENCE_CREATED_WITH_CYCLES)) {
+				numberOfRefunds += ipn.getRefunds();
+			}
+
+			if (transaction.equals(TransactionType.RECURRENCE_CANCELED)) {
+				this.canceled = true;
+				this.cancelIPN = ipn;
+			}
+			if (transaction.equals(TransactionType.RECURRENCE_PAYMENT)
+					|| transaction.equals(TransactionType.RECURRENCE_OUTSTANDING_PAYMENT)
+					|| transaction.equals(TransactionType.RECURRENCE_CREATED_WITH_FIRST_PAYMENT)
+					|| transaction.equals(TransactionType.RECURRENCE_CREATED_WITH_CYCLES))
+				numberOfPayments += ipn.getPaidCycles();
+			if (transaction.equals(TransactionType.RECURRENCE_SKIPPED)
+					|| transaction.equals(TransactionType.RECURRENCE_CREATED_BUT_SKIPPED))
 				numberOfSkips++;
-			if (ipn.getTransactionType().equals(
-					TransactionType.RECURRENCE_FAILED)
-					|| ipn.getTransactionType().equals(
-							TransactionType.RECURRENCE_OUTSTANDING_FAILED))
+			if (transaction.equals(TransactionType.RECURRENCE_FAILED)
+					|| transaction.equals(TransactionType.RECURRENCE_OUTSTANDING_FAILED))
 				numberOfFailures++;
 		}
 		// linked hash set to remove repeated elements
 		this.ipns = new ArrayList<>(new LinkedHashSet<>(ipns));
-		//Collections.sort(this.ipns);
+		// Collections.sort(this.ipns);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see br.com.caelum.paypal.doom.Recurrence#getPayerEmail()
 	 */
 	@Override
@@ -70,7 +80,9 @@ public class PaypalRecurrence implements Recurrence {
 		return ipns.iterator().next().getPayerEmail();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see br.com.caelum.paypal.doom.Recurrence#getRecurrenceId()
 	 */
 	@Override
@@ -82,15 +94,19 @@ public class PaypalRecurrence implements Recurrence {
 		return ipns;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see br.com.caelum.paypal.doom.Recurrence#getNumberOfPayments()
 	 */
 	@Override
 	public int getNumberOfPayments() {
 		return numberOfPayments;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see br.com.caelum.paypal.doom.Recurrence#getNumberOfRealPayments()
 	 */
 	@Override
@@ -98,7 +114,9 @@ public class PaypalRecurrence implements Recurrence {
 		return numberOfPayments - numberOfRefunds;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see br.com.caelum.paypal.doom.Recurrence#getNumberOfRefunds()
 	 */
 	@Override
@@ -106,7 +124,9 @@ public class PaypalRecurrence implements Recurrence {
 		return numberOfRefunds;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see br.com.caelum.paypal.doom.Recurrence#getNumberOfSkips()
 	 */
 	@Override
@@ -114,7 +134,9 @@ public class PaypalRecurrence implements Recurrence {
 		return numberOfSkips;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see br.com.caelum.paypal.doom.Recurrence#getNumberOfFailures()
 	 */
 	@Override
@@ -122,7 +144,9 @@ public class PaypalRecurrence implements Recurrence {
 		return numberOfFailures;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see br.com.caelum.paypal.doom.Recurrence#getTotalPaid()
 	 */
 	@Override
@@ -130,10 +154,8 @@ public class PaypalRecurrence implements Recurrence {
 		BigDecimal total = new BigDecimal("0.00");
 
 		for (IPN i : ipns) {
-			if (i.getTransactionType().equals(
-					TransactionType.RECURRENCE_PAYMENT)
-					|| i.getTransactionType().equals(
-							TransactionType.RECURRENCE_CREATED_WITH_PAYMENT))
+			if (i.getTransactionType().equals(TransactionType.RECURRENCE_PAYMENT)
+					|| i.getTransactionType().equals(TransactionType.RECURRENCE_CREATED_WITH_FIRST_PAYMENT))
 				total = total.add(i.getAmount());
 			if (i.getTransactionType().equals(TransactionType.REFUND))
 				total = total.subtract(i.getAmount());
@@ -141,26 +163,24 @@ public class PaypalRecurrence implements Recurrence {
 		return total;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see br.com.caelum.paypal.doom.Recurrence#isCanceled()
 	 */
 	@Override
 	public boolean isCanceled() {
-		for (IPN i : ipns) {
-			if (i.getTransactionType().equals(
-					TransactionType.RECURRENCE_CANCELED))
-				return true;
-		}
-		return false;
+		return this.canceled;
 	}
 
 	@Override
 	public int compareTo(Recurrence g) {
-		return this.getTimeCreated()
-				.compareTo(g.getTimeCreated());
+		return this.getTimeCreated().compareTo(g.getTimeCreated());
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see br.com.caelum.paypal.doom.Recurrence#hasRealPayments()
 	 */
 	@Override
@@ -168,7 +188,9 @@ public class PaypalRecurrence implements Recurrence {
 		return getNumberOfRealPayments() > 0;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see br.com.caelum.paypal.doom.Recurrence#hasSkips()
 	 */
 	@Override
@@ -183,40 +205,49 @@ public class PaypalRecurrence implements Recurrence {
 		for (IPN i : getIpns()) {
 			transactions.add(i.getTransactionType());
 		}
-		return String.format(
-				"[REC %s %8s paid:%2d skip:%2d refunds:%2d R$%7s %25s %s %s %s]",
-				formatter.print(getTimeCreated()), isCanceled() ? "CANCELED"
-						: "VALID", getNumberOfRealPayments(), getNumberOfSkips(),
-				getNumberOfRefunds(), getTotalPaid(), getPayerEmail()
-						.substring(0, Math.min(24, getPayerEmail().length())),
-				 getType(), recurrenceId, transactions);
+		return String.format("[REC %s %8s paid:%2d skip:%2d refunds:%2d R$%7s %25s %s %s %s]",
+				formatter.print(getTimeCreated()), isCanceled() ? "CANCELED" : "VALID", getNumberOfRealPayments(),
+				getNumberOfSkips(), getNumberOfRefunds(), getTotalPaid(),
+				getPayerEmail().substring(0, Math.min(24, getPayerEmail().length())), getType(), recurrenceId,
+				transactions);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see br.com.caelum.paypal.doom.Recurrence#getTimeCreated()
 	 */
 	@Override
 	public DateTime getTimeCreated() {
 		return ipns.get(0).getTimeCreated();
 	}
-	
+
 	public String getProductName() {
 		return productName;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see br.com.caelum.paypal.doom.Recurrence#getExpectedPayment()
 	 */
 	@Override
 	public BigDecimal getExpectedPayment() {
 		return new BigDecimal("0.0");
 	}
+
 	
-	/* (non-Javadoc)
-	 * @see br.com.caelum.paypal.doom.Recurrence#getType()
-	 */
+	
 	@Override
 	public RecurrenceType getType() {
 		return type;
+	}
+
+	@Override
+	public DateTime getTimeCanceled() {
+		if(!this.isCanceled()) {
+			throw new IllegalStateException("not canceled");
+		}
+		return this.cancelIPN.getTimeCreated();
 	}
 }

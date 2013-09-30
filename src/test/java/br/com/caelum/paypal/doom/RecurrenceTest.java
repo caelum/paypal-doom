@@ -3,6 +3,8 @@ package br.com.caelum.paypal.doom;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -95,6 +97,30 @@ public class RecurrenceTest {
 				"residence_country=BR;&product_name=1 mes de cursos da Caelum no Caelum Online, R$99.99;&time_created=09:43:34 May 07, 2013 PDT;&next_payment_date=N/A;&verify_sign=ABZ8SWDjZvuwvTb6gqiguyiUaT0PASphXiABVKxIFw2G0XoQ9K8HbYv3;&outstanding_balance=99.99;&amount=99.99;&first_name=EDUARDO;&payer_id=REFM3XJMNJUHN;&shipping=0.00;&payer_email=xpto@gmail.com;&period_type= Regular;&receiver_email=billing@caelum.com.br;&notify_version=3.7;&txn_type=recurring_payment_profile_cancel;&currency_code=BRL;&payer_status=unverified;&rp_invoice_id=c211221d-e227-452e-9e42-0a25de1cc446;&initial_payment_amount=0.00;&charset=UTF-8;&product_type=1;&amount_per_cycle=99.99;&ipn_track_id=a47af2be6b7a;&recurring_payment_id=I-RN98NF4PXWFL;&tax=0.00;&payment_cycle=Monthly;&last_name=xpto;&profile_status=Cancelled;&");
 	}
 
+	
+	@Test
+	public void test_ipns_with_gui_format() {
+		IPN ipn1 = new IPN(
+				"residence_country=BR;&time_created=2013-03-08T03:00:00Z;&initial_payment_amount=0.00;&product_name=PAYPAL_99;&payment_status=Created;&payer_email=I-F7BNNY4H7J35;&txn_type=recurring_payment_profile_created;&format=GUI;&recurring_payment_id=I-F7BNNY4H7J35;&paidCycles=3;&paidFailed=0;&reimbursements=1;");
+	
+		Recurrence g = new PaypalRecurrence("I-F7BNNY4H7J35", Arrays.asList(ipn1));
+		Assert.assertFalse(g.isCanceled());
+		Assert.assertTrue(g.hasRealPayments());
+		Assert.assertEquals(2, g.getNumberOfRealPayments());
+		Assert.assertEquals(1, g.getNumberOfRefunds());
+	}
+	
+	@Test
+	public void test_ipn_with_gui_format_and_time_canceled() {
+		IPN ipn1 = new IPN(
+				"residence_country=BR;&time_created=2013-03-04T03:00:00Z;&initial_payment_amount=0.00;&product_name=PAYPAL_99;&payment_status=Canceled;&payer_email=I-KL59BPEW6LGX;&txn_type=recurring_payment_profile_cancel;&format=GUI;&recurring_payment_id=I-KL59BPEW6LGX;&paidCycles=0;&paidFailed=0;&reimbursements=0;");
+	
+		Recurrence g = new PaypalRecurrence("I-KL59BPEW6LGX", Arrays.asList(ipn1));
+		Assert.assertTrue(g.isCanceled());
+		DateTime time = new DateTime(2013, 3, 4, 0, 0, 0, 0, DateTimeZone.forID("-03:00"));
+		Assert.assertTrue(time.isEqual(g.getTimeCanceled()));
+	}
+	
 	@Test
 	public void test_ipns_with_valid_payments() {
 		// ERA MELHOR COM MOCK

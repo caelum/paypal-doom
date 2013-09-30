@@ -24,11 +24,18 @@ public class IPNTest {
 
 		assertEquals("paulo@paulo.com.br", msgFor(bigtest).getPayerEmail());
 		assertEquals(new BigDecimal("699.99"), msgFor(bigtest).getAmount());
-		assertTrue(new DateTime(2013, 6, 18, 12, 29, 57,
-				DateTimeZone.forID("-07:00")).isEqual(msgFor(bigtest)
+		assertTrue(new DateTime(2013, 6, 18, 12, 29, 57, DateTimeZone.forID("-07:00")).isEqual(msgFor(bigtest)
 				.getTimeCreated()));
-		assertEquals(TransactionType.RECURRENCE_SKIPPED, msgFor(bigtest)
-				.getTransactionType());
+		assertEquals(TransactionType.RECURRENCE_SKIPPED, msgFor(bigtest).getTransactionType());
+	}
+
+	@Test
+	public void should_extract_reverts() {
+		String bigtest = "residence_country=BR;&time_created=16:16:32 Aug 18, 2013 PDT;&product_name=1 mes de cursos da Alura, R$197.00;&next_payment_date=03:00:00 Oct 18, 2013 PDT;&verify_sign=AEznnBrRLYScMbPMrwlFd0iK3H5TAGT9KVcOuNCH8jPXyuoLlsmoWyHA;&outstanding_balance=0.00;&address_country=Brazil;&address_city=Sao Paulo;&business=contato@alura.com.br;&payment_status=Reversed;&transaction_subject=1 mes de cursos da Alura, R$197.00;&protection_eligibility=Eligible;&amount=197.00;&shipping=0.00;&first_name=Elma;&payer_id=L7VPJ4T3LAPU6;&payer_email=asdasd@terra.com.br;&mc_fee=-11.24;&txn_id=2A8880296J333104V;&receiver_email=contato@alura.com.br;&period_type= Regular;&notify_version=3.7;&currency_code=BRL;&mc_currency=BRL;&mc_gross=-185.76;&reason_code=unauthorized_claim;&payment_date=19:53:20 Sep 19, 2013 PDT;&rp_invoice_id=873db299-6e1f-4380-9014-b88023e38435;&payment_fee=;&initial_payment_amount=0.00;&address_country_code=BR;&charset=UTF-8;&product_type=1;&payment_gross=;&amount_per_cycle=197.00;&address_zip=04276-000;&address_state=São Paulo;&ipn_track_id=f91492d61c48e;&recurring_payment_id=I-BUMHMUBNCA1N;&address_name=Elsadddessa;&payment_cycle=Monthly;&last_name=labadessa;&profile_status=Active;&parent_txn_id=6J0646696X8626434;&payment_type=instant;&address_street=asdd13 -bloco B - Ap.63B";
+
+		assertEquals(TransactionType.REFUND, msgFor(bigtest).getTransactionType());
+
+		assertEquals(1, msgFor(bigtest).getRefunds());
 	}
 
 	@Test
@@ -37,11 +44,23 @@ public class IPNTest {
 
 		assertEquals("paulo@paulo.com.br", msgFor(bigtest).getPayerEmail());
 		assertEquals(new BigDecimal("197.00"), msgFor(bigtest).getAmount());
-		
-		assertEquals(TransactionType.RECURRENCE_CREATED_WITH_PAYMENT, msgFor(bigtest)
-				.getTransactionType());
+
+		assertEquals(1, msgFor(bigtest).getPaidCycles());
+
+		assertEquals(TransactionType.RECURRENCE_CREATED_WITH_FIRST_PAYMENT, msgFor(bigtest).getTransactionType());
 	}
-	
+
+	// formato do guilherme
+	@Test
+	public void should_extracted_created_with_cycles() {
+		String bigtest = "residence_country=BR;&time_created=2013-04-02T03:00:00Z;&initial_payment_amount=0.00;&product_name=PAYPAL_99;&payment_status=Created;&payer_email=I-8CE14V3NF4TK;&txn_type=recurring_payment_profile_created;&format=GUI;&recurring_payment_id=I-8CE14V3NF4TK;&paidCycles=6;&paidFailed=0;&reimbursements=2;";
+
+		assertEquals("I-8CE14V3NF4TK", msgFor(bigtest).getPayerEmail());
+		assertEquals(6, msgFor(bigtest).getPaidCycles());
+		assertEquals(2, msgFor(bigtest).getRefunds());
+
+		assertEquals(TransactionType.RECURRENCE_CREATED_WITH_CYCLES, msgFor(bigtest).getTransactionType());
+	}
 
 	@Test
 	public void should_extracted_created_with_initial_skipped_transaction() {
@@ -49,11 +68,10 @@ public class IPNTest {
 
 		assertEquals("paulo@paulo.com.br", msgFor(bigtest).getPayerEmail());
 		assertEquals(new BigDecimal("197.00"), msgFor(bigtest).getAmount());
-		
-		assertEquals(TransactionType.RECURRENCE_CREATED_BUT_SKIPPED, msgFor(bigtest)
-				.getTransactionType());
+
+		assertEquals(TransactionType.RECURRENCE_CREATED_BUT_SKIPPED, msgFor(bigtest).getTransactionType());
 	}
-	
+
 	@Test
 	public void should_extract_refunded_transaction() {
 		String bigtest = "residence_country=BR;&time_created=04:35:24 Apr 08, 2013 PDT;&product_name=Assinatura mensal dos cursos da Caelum Online R$ 99.99;&next_payment_date=03:00:00 Jun 08, 2013 PDT;&verify_sign=AWy5onB6REQ69mF6b0z9PVkmSoQCAWazI6ocF9rjCty4sdCuNrNMEgue;&outstanding_balance=0.00;&address_country=Brazil;&address_city=Samambaia;&payment_status=Refunded;&business=billing@caelum.com.br;&transaction_subject=Assinatura mensal dos cursos da Caelum Online R$ 99.99;&protection_eligibility=Eligible;&amount=99.99;&first_name=Leandro;&payer_id=E9X2HT2ZZ2ZXA;&shipping=0.00;&payer_email=paulo@paulo.com.br;&mc_fee=-6.00;&txn_id=6F326900UD8699639;&period_type= Regular;&receiver_email=billing@caelum.com.br;&notify_version=3.7;&currency_code=BRL;&mc_gross=-99.99;&mc_currency=BRL;&reason_code=refund;&payment_date=12:43:41 May 14, 2013 PDT;&rp_invoice_id=7a91cecc875d42de8a70b4c0015095fb;&payment_fee=;&initial_payment_amount=0.00;&charset=UTF-8;&address_country_code=BR;&product_type=1;&payment_gross=;&address_zip=72313-704;&amount_per_cycle=99.99;&ipn_track_id=6a9ce72923b1d;&address_state=Distrito Federal;&recurring_payment_id=I-SCPTA2P7HC1W;&payment_cycle=Monthly;&address_name=Paulo;&last_name=Silveira;&profile_status=Active;&parent_txn_id=48P98417PJ436153V;&payment_type=instant;&receiver_id=DM59MZNG5GJNN;&address_street=QUADRA QR 511 CONJUNTO 4\n23;&";
@@ -61,8 +79,8 @@ public class IPNTest {
 		assertEquals("paulo@paulo.com.br", msgFor(bigtest).getPayerEmail());
 		assertEquals(new BigDecimal("99.99"), msgFor(bigtest).getAmount());
 		assertNotNull((msgFor(bigtest).getTimeCreated()));
-		assertEquals(TransactionType.REFUND, msgFor(bigtest)
-				.getTransactionType());
+		assertEquals(1, (msgFor(bigtest).getRefunds()));
+		assertEquals(TransactionType.REFUND, msgFor(bigtest).getTransactionType());
 	}
 
 	@Test
@@ -73,7 +91,10 @@ public class IPNTest {
 				"residence_country=BR;&next_payment_date=03:00:00 Jul 08, 2013 PDT;&address_city=Samambaia;&amount=99.99;&shipping=0.00;&first_name=Leandro;&payer_id=E9X2HT2ZZ2ZXA;&mc_fee=6.00;&txn_id=2TG76408E1226930S;&receiver_email=billing@caelum.com.br;&period_type= Regular;&currency_code=BRL;&payment_date=06:43:57 Jun 08, 2013 PDT;&payment_fee=;&initial_payment_amount=0.00;&address_country_code=BR;&charset=UTF-8;&payment_gross=;&address_zip=72313-704;&ipn_track_id=410b5b77bb22e;&tax=0.00;&address_name=Leandro Silveira;&payment_cycle=Monthly;&last_name=Silveira;&profile_status=Active;&receiver_id=DM59MZNG5GJNN;&time_created=04:35:24 Apr 08, 2013 PDT;&product_name=Assinatura mensal dos cursos da Caelum Online R$ 99.99;&verify_sign=A5qTmJSd.qwDwa8HzaIAfZInmiuVAaCB1VPrv2WtivxAc565XZtmH0jJ;&outstanding_balance=0.00;&address_country=Brazil;&business=billing@caelum.com.br;&payment_status=Completed;&address_status=unconfirmed;&transaction_subject=Assinatura mensal dos cursos da Caelum Online R$ 99.99;&protection_eligibility=Eligible;&payer_email=paulo@gmail.com;&notify_version=3.7;&txn_type=recurring_payment;&mc_currency=BRL;&payer_status=unverified;&mc_gross=99.99;&rp_invoice_id=7a91cecc875d42de8a70b4c0015095fb;&product_type=1;&amount_per_cycle=99.99;&address_state=Distrito Federal;&recurring_payment_id=I-SCPTA2P7HC1W;&payment_type=instant;&address_street=QUADRA QR 511 CONJUNTO 4\n23;&");
 
 		Assert.assertEquals(new BigDecimal("99.99"), ipn1.getAmount());
+		assertEquals(1, ipn1.getPaidCycles());
+
 		Assert.assertEquals(new BigDecimal("99.99"), ipn2.getAmount());
+		assertEquals(1, ipn2.getPaidCycles());
 	}
 
 	@Test
@@ -110,8 +131,7 @@ public class IPNTest {
 	}
 
 	@Test
-	public void should_decode_encoded_characters()
-			throws UnsupportedEncodingException {
+	public void should_decode_encoded_characters() throws UnsupportedEncodingException {
 		String value = "guilherme.silveira@caelum.com.br";
 		String encoded = URLEncoder.encode(value, "UTF-8");
 		assertNotSame(value, encoded);
