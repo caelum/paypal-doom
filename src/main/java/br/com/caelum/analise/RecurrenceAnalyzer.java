@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -14,7 +15,7 @@ public class RecurrenceAnalyzer {
 
 	static final DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy");
 	
-	private Map<DateTime, RecurrenceDelta> deltas = new TreeMap<>();
+	private Map<DateMidnight, RecurrenceDelta> deltas = new TreeMap<>();
 	private Histogram all = new Histogram();
 	private Histogram activeRecurrences = new Histogram();
 	private Histogram canceledRecurrences = new Histogram();
@@ -46,10 +47,11 @@ public class RecurrenceAnalyzer {
 	}
 
 	private RecurrenceDelta getDeltaFor(DateTime time) {
-		if (!deltas.containsKey(time)) {
-			deltas.put(time, new RecurrenceDelta());
+		DateMidnight date = time.toDateMidnight();
+		if (!deltas.containsKey(date)) {
+			deltas.put(date, new RecurrenceDelta());
 		}
-		return deltas.get(time);
+		return deltas.get(date);
 	}
 
 	public BigDecimal getAmount() {
@@ -67,7 +69,7 @@ public class RecurrenceAnalyzer {
 	
 	public void showDeltas() {
 		int total = 0;
-		for(DateTime date : deltas.keySet()) {
+		for(DateMidnight date : deltas.keySet()) {
 			RecurrenceDelta delta = deltas.get(date);
 			total = total + delta.getNewRecurrences() - delta.getCanceledRecurrences();
 			System.out.printf("%s - %3d(+%2d, -%2d)\n", formatter.print(date), total, delta.getNewRecurrences(), delta.getCanceledRecurrences());

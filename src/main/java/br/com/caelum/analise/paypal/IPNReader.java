@@ -31,7 +31,8 @@ public class IPNReader {
 	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
 		IPNAnalyzer analyzer = new IPNAnalyzer();
 		Scanner s = new Scanner(new InputStreamReader(new FileInputStream(
-				"/Users/peas/Desktop/Dropbox/tmp/ipns/ipns-plus-gui.txt"), "ISO-8859-1"));
+				//"/Users/peas/Desktop/Dropbox/tmp/ipns/ipns-plus-gui.txt"), "ISO-8859-1"));
+				"/Users/peas/Desktop/Dropbox/tmp/ipns/paulo-aniche-paypal.txt"), "ISO-8859-1"));
 				
 		while (s.hasNextLine()) {
 			String line = s.nextLine();
