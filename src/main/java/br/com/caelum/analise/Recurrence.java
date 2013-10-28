@@ -6,6 +6,8 @@ import org.joda.time.DateTime;
 
 public interface Recurrence  extends Comparable<Recurrence> {
 
+	public abstract String getState();
+
 	public abstract String getPayerEmail();
 
 	public abstract String getRecurrenceId();

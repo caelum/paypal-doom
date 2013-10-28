@@ -174,4 +174,12 @@ public class IPN {
 		}
 		throw new IllegalStateException();
 	}
+
+	public String getState() {
+		if(!hasKey("address_state")) {
+			return "none";
+		}
+		return extract("address_state");
+	}
+
 }

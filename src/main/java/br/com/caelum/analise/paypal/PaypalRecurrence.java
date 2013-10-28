@@ -32,9 +32,13 @@ public class PaypalRecurrence implements Recurrence {
 
 	private IPN cancelIPN;
 
+	private String state;
+
 	public PaypalRecurrence(String recurrenceId, List<IPN> ipns) {
 		this.recurrenceId = recurrenceId;
-		this.productName = ipns.iterator().next().getProductName();
+		this.productName = ipns.get(0).getProductName();
+		this.state = ipns.get(0).getState();
+		
 		this.type = RecurrenceType.toType(ipns.iterator().next().getProductName());
 
 		for (IPN ipn : ipns) {
@@ -222,6 +226,11 @@ public class PaypalRecurrence implements Recurrence {
 		return ipns.get(0).getTimeCreated();
 	}
 
+	@Override
+	public String getState() {
+		return state;
+	}
+	
 	public String getProductName() {
 		return productName;
 	}
